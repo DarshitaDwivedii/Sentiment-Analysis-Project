@@ -2,8 +2,8 @@
 
 This project provides a complete end-to-end workflow for sentiment analysis on the IMDB movie review dataset. It includes data cleaning, exploratory data analysis, training and tuning a high-performance machine learning model, and deploying the model as an interactive web application using Streamlit.
 
-![Streamlit App Demo](https://sentiment-analysis-project-p3.streamlit.app/)
-*(Note: You will need to create this GIF yourself and upload it to your repo for it to display)*
+
+
 
 
 ## 📋 Table of Contents
@@ -33,15 +33,14 @@ This project provides a complete end-to-end workflow for sentiment analysis on t
 The repository is organized as follows:
 SENTIMENT-ANALYSIS-PROJECT/
 │
-├── .venv/ # Virtual environment files
-├── .git/ # Git repository data
-│
-├── app.py # The Streamlit web application script
-├── best_ml_model.pkl # Saved file for the trained model pipeline
-├── IMDB Dataset.csv # The dataset used for training and testing
-├── requirements.txt # Required Python libraries for the project
-├── Sentiment_Analysis_Project.ipynb # Jupyter notebook with the full analysis
-└── README.md # This documentation file
+├── app.py                      # Streamlit web application
+├── best_ml_model.pkl          # Trained ML model (scikit-learn pipeline)
+├── IMDB Dataset.csv           # IMDB reviews dataset
+├── requirements.txt           # Python dependencies
+├── Sentiment_Analysis_Project.ipynb # Main analysis notebook
+├── README.md                  # Project documentation
+└── .venv/                     # (optional) Local virtual environment
+
 
 
 ## 🛠️ Technical Stack
@@ -112,7 +111,18 @@ Final Test Set Results:
 - F1-Score	0.91
 The model demonstrates strong, balanced performance in classifying both positive and negative reviews.
 
+## 🌐 Live Demo
+
+Try out the live sentiment analysis app here:  
+🔗 [Deployed App on Streamlit](https://sentiment-analysis-project-p3.streamlit.app/)
+
+🎥 Here's a short demo video of the application in action:  
+[![Watch the video](https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
+
+> You can enter a single review or upload a CSV file with reviews. The app will automatically detect the correct column and predict the sentiment!
+
 ## 🔮 Future Improvements
+
 The potential future enhancements could include:
 - **Advanced Deep Learning**: Implementing a state-of-the-art Transformer-based model (like BERT or DistilBERT) to potentially increase accuracy to the 94-95% range.
 - **Aspect-Based Sentiment Analysis**: Extending the model to identify not just the overall sentiment, but the sentiment towards specific aspects (e.g., "The acting was great, but the plot was terrible").
