@@ -11,19 +11,16 @@ import io
 # ==============================================================================
 
 # --- 1. NLTK DATA DOWNLOAD ---
-# We are directly calling the download commands at the top level of the script.
-# This ensures they are executed once when the app starts, before any other code runs.
+# We still need 'stopwords' and 'wordnet'. These rarely cause issues.
+# The problematic 'punkt' download is no longer needed for our new tokenizer.
 try:
-    nltk.download('punkt')
     nltk.download('stopwords')
     nltk.download('wordnet')
 except Exception as e:
     st.error(f"Error downloading NLTK data: {e}")
-    # Stop the app if NLTK data fails to download
     st.stop()
 
 # --- 2. LOAD THE MACHINE LEARNING MODEL ---
-# This loads the entire pipeline (vectorizer + classifier).
 try:
     model_pipeline = joblib.load('best_ml_model.pkl')
 except FileNotFoundError:
@@ -31,9 +28,7 @@ except FileNotFoundError:
     st.stop()
 
 
-# --- 3. IMPORT AND INITIALIZE NLTK COMPONENTS ---
-# These MUST be initialized after the download is complete.
-from nltk.tokenize import word_tokenize
+# --- 3. INITIALIZE NLTK COMPONENTS ---
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 
@@ -48,13 +43,22 @@ lemmatizer = WordNetLemmatizer()
 def data_cleaning(text):
     """
     Cleans the input text using the same process as the training notebook.
+    Uses a reliable regex for tokenization to avoid NLTK's file lookup errors.
     """
     text = str(text).lower()
     text = contractions.fix(text)
     text = re.sub(r'<.*?>', '', text)
     text = re.sub(r'https?://\S+|www\.\S+', '', text)
     text = re.sub(r'[^a-zA-Z0-9\s]', '', text)
-    tokens = word_tokenize(text) # This is the line that was causing the error
+
+    # --- THIS IS THE KEY CHANGE ---
+    # Replace nltk.word_tokenize with a reliable regex tokenizer
+    # This pattern splits words and numbers, effectively doing what word_tokenize did.
+    # It has NO external file dependencies and will not fail on the server.
+    tokens = re.findall(r'\b\w+\b', text)
+    
+    # --- End of Key Change ---
+
     negation_words = {'not', 'no', 'never', 'ain\'t'}
     filtered_tokens = [word for word in tokens if word not in stop_words or word in negation_words]
     lemmatized_tokens = [lemmatizer.lemmatize(word) for word in filtered_tokens]
@@ -66,7 +70,6 @@ def predict_sentiment(review_text):
     Takes raw text, cleans it, and uses the loaded model pipeline to predict sentiment.
     """
     cleaned_text = data_cleaning(review_text)
-    # The pipeline handles both vectorization and prediction
     prediction = model_pipeline.predict([cleaned_text])
     return "Positive" if prediction[0] == 1 else "Negative"
 
@@ -123,14 +126,12 @@ if uploaded_file is not None:
             st.info(f"Automatically detected **'{review_column}'** as the review column.")
 
             with st.spinner(f"Processing your file... Analyzing column '{review_column}'."):
-                # Using a list comprehension for faster processing on the server
                 predictions = [predict_sentiment(row) for row in df[review_column]]
                 df['predicted_sentiment'] = predictions
 
                 st.success("Analysis complete!")
                 st.dataframe(df.head())
 
-                # Prepare the file for download
                 csv_output = df.to_csv(index=False).encode('utf-8')
 
                 st.download_button(
